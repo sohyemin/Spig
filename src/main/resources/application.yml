@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/spig
-    username: postgres
-    password: postgres
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -12,3 +12,7 @@ spring:
       hibernate:
         format_sql: true
     show-sql: true
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
