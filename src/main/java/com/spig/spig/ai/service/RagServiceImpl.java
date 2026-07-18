@@ -21,7 +21,7 @@ public class RagServiceImpl implements RagService{
         List<Document> documents = vectorStore.similaritySearch(
                 SearchRequest.builder()
                         .query(message)
-                        .similarityThreshold(0.8)
+                        .similarityThreshold(0.75)
                         .topK(3)
                         .build()
         );
@@ -32,6 +32,8 @@ public class RagServiceImpl implements RagService{
 
                         학습 자료:
                         %s
+                      
+                        모르면 모른다고 답변하세요.
                         """.formatted(documents))
                 .user(message)
                 .call()

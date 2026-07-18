@@ -2,8 +2,6 @@ package com.spig.spig.learning.service;
 
 import com.spig.spig.learning.dto.LearningRequestDto;
 import com.spig.spig.learning.dto.LearningResponseDto;
-import com.spig.spig.learning.entity.LearningContent;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

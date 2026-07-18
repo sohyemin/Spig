@@ -2,18 +2,16 @@ package com.spig.spig.learning.service;
 
 import com.spig.spig.learning.dto.LearningRequestDto;
 import com.spig.spig.learning.dto.LearningResponseDto;
+import com.spig.spig.learning.entity.EmbeddingStatus;
 import com.spig.spig.learning.entity.LearningContent;
 import com.spig.spig.learning.repository.LearningRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,8 +30,6 @@ public class LearningServiceImpl implements LearningService{
     @Override
     @Transactional
     public void saveAll(List<LearningRequestDto> request) {
-        List<Document> documents = new ArrayList<>();
-
         for (LearningRequestDto dto:request){
             LearningContent saved = learningRepository.save(LearningContent.from(dto));
         }
@@ -55,6 +51,7 @@ public class LearningServiceImpl implements LearningService{
     public void modifyContent(Long id, LearningRequestDto dto) {
         LearningContent content = getContent(id);
         content.update(dto);
+        content.changeEmbeddingStatus(EmbeddingStatus.PENDING);
     }
 
     @Override
