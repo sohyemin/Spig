@@ -18,8 +18,14 @@ public class LearningController {
     private final LearningService learningService;
 
     @PostMapping("")
-    public void learningContent(@RequestBody LearningRequestDto dto) {
-        learningService.save(dto);
+    public LearningResponseDto learningContent(@RequestBody LearningRequestDto dto) {
+        return learningService.save(dto);
+    }
+
+    @PostMapping("/bulk")
+        public void learningContents(
+                @RequestBody List<LearningRequestDto> request) {
+        learningService.saveAll(request);
     }
 
     @GetMapping("")

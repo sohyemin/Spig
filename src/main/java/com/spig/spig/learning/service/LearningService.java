@@ -10,16 +10,18 @@ import java.util.List;
 public interface LearningService {
 
     // Create
-    public void save(LearningRequestDto dto);
+    public LearningResponseDto save(LearningRequestDto dto);
+    void saveAll(List<LearningRequestDto> request);
 
     // Read
+
     public List<LearningResponseDto> readAll();
 
     public LearningResponseDto readById(Long id);
-
     // Update
-    public void modifyContent(Long id, LearningRequestDto dto);
 
+    public void modifyContent(Long id, LearningRequestDto dto);
     // Delete
+
     public void deleteContent(Long id);
 }

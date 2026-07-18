@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -20,3 +20,6 @@ spring:
         options:
           model: gpt-5.4-nano
           max-completion-tokens: 200
+    vectorstore:
+      pgvector:
+        initialize-schema: true
