@@ -27,11 +27,19 @@ public class LearningContent {
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .category(dto.getCategory())
+                .embeddingStatus(EmbeddingStatus.PENDING)
                 .build();}
 
     public void update(LearningRequestDto dto) {
         this.title = dto.getTitle();
         this.content = dto.getContent();
         this.category = dto.getCategory();
+    }
+
+    @Enumerated(EnumType.STRING)
+    private EmbeddingStatus embeddingStatus;
+
+    public void changeEmbeddingStatus(EmbeddingStatus embeddingStatus) {
+        this.embeddingStatus = embeddingStatus;
     }
 }

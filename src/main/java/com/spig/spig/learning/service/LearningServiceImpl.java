@@ -21,24 +21,11 @@ import java.util.Map;
 public class LearningServiceImpl implements LearningService{
 
     private final LearningRepository learningRepository;
-    private final VectorStore vectorStore;
 
     @Override
     @Transactional
     public LearningResponseDto save(LearningRequestDto dto) {
         LearningContent saved = learningRepository.save(LearningContent.from(dto));
-
-        Document document = new Document(
-                saved.getContent(),
-                Map.of(
-                        "learningContentId", saved.getId().toString(),
-                        "title", saved.getTitle(),
-                        "category", saved.getCategory()
-                )
-        );
-
-        vectorStore.add(List.of(document));
-
         return LearningResponseDto.to(saved);
     }
 
@@ -49,20 +36,7 @@ public class LearningServiceImpl implements LearningService{
 
         for (LearningRequestDto dto:request){
             LearningContent saved = learningRepository.save(LearningContent.from(dto));
-
-            documents.add(
-                    new Document(
-                            saved.getContent(),
-                            Map.of(
-                                    "learningContentId", saved.getId().toString(),
-                                    "title", saved.getTitle(),
-                                    "category", saved.getCategory()
-                            )
-                    )
-            );
         }
-
-        vectorStore.add(documents);
     }
 
     @Override
