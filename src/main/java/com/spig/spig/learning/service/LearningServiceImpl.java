@@ -6,11 +6,9 @@ import com.spig.spig.learning.entity.EmbeddingStatus;
 import com.spig.spig.learning.entity.LearningContent;
 import com.spig.spig.learning.repository.LearningRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,9 +28,11 @@ public class LearningServiceImpl implements LearningService{
     @Override
     @Transactional
     public void saveAll(List<LearningRequestDto> request) {
-        for (LearningRequestDto dto:request){
-            LearningContent saved = learningRepository.save(LearningContent.from(dto));
-        }
+        List<LearningContent> contents = request.stream()
+                .map(LearningContent::from)
+                .toList();
+
+        learningRepository.saveAll(contents);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class LearningServiceImpl implements LearningService{
     @Override
     @Transactional
     public void deleteContent(Long id) {
-        learningRepository.deleteById(id);
+        getContent(id).changeEmbeddingStatus(EmbeddingStatus.DELETE_PENDING);
     }
 
 

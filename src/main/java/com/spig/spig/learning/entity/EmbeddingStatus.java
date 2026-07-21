@@ -4,5 +4,6 @@ public enum EmbeddingStatus {
     PENDING,
     PROCESSING,
     COMPLETED,
-    FAILED
+    FAILED,
+    DELETE_PENDING
 }
