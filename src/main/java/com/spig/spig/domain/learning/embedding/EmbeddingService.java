@@ -1,8 +1,8 @@
-package com.spig.spig.learning.embedding;
+package com.spig.spig.domain.learning.embedding;
 
-import com.spig.spig.learning.entity.EmbeddingStatus;
-import com.spig.spig.learning.entity.LearningContent;
-import com.spig.spig.learning.repository.LearningRepository;
+import com.spig.spig.domain.learning.entity.EmbeddingStatus;
+import com.spig.spig.domain.learning.entity.LearningContent;
+import com.spig.spig.domain.learning.repository.LearningRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;

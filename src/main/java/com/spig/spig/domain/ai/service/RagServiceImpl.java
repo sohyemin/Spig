@@ -1,4 +1,4 @@
-package com.spig.spig.ai.service;
+package com.spig.spig.domain.ai.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;

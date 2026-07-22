@@ -1,4 +1,4 @@
-package com.spig.spig.ai.dto;
+package com.spig.spig.domain.ai.dto;
 
 import lombok.Getter;
 

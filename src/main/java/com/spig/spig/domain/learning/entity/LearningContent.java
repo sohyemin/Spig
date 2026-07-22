@@ -1,6 +1,6 @@
-package com.spig.spig.learning.entity;
+package com.spig.spig.domain.learning.entity;
 
-import com.spig.spig.learning.dto.LearningRequestDto;
+import com.spig.spig.domain.learning.dto.LearningRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 

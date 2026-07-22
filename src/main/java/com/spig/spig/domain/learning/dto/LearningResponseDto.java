@@ -1,7 +1,7 @@
-package com.spig.spig.learning.dto;
+package com.spig.spig.domain.learning.dto;
 
-import com.spig.spig.learning.entity.Category;
-import com.spig.spig.learning.entity.LearningContent;
+import com.spig.spig.domain.learning.entity.Category;
+import com.spig.spig.domain.learning.entity.LearningContent;
 import lombok.Builder;
 import lombok.Getter;
 

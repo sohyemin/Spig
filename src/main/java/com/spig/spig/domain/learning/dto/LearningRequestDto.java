@@ -1,6 +1,6 @@
-package com.spig.spig.learning.dto;
+package com.spig.spig.domain.learning.dto;
 
-import com.spig.spig.learning.entity.Category;
+import com.spig.spig.domain.learning.entity.Category;
 import lombok.Getter;
 
 @Getter

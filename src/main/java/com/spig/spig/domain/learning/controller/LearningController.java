@@ -1,10 +1,8 @@
-package com.spig.spig.learning.controller;
+package com.spig.spig.domain.learning.controller;
 
-import com.spig.spig.learning.dto.LearningRequestDto;
-import com.spig.spig.learning.dto.LearningResponseDto;
-import com.spig.spig.learning.entity.LearningContent;
-import com.spig.spig.learning.service.LearningService;
-import jakarta.websocket.server.PathParam;
+import com.spig.spig.domain.learning.dto.LearningRequestDto;
+import com.spig.spig.domain.learning.dto.LearningResponseDto;
+import com.spig.spig.domain.learning.service.LearningService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

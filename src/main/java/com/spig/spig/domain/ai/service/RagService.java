@@ -1,4 +1,4 @@
-package com.spig.spig.ai.service;
+package com.spig.spig.domain.ai.service;
 
 public interface RagService {
     //Similarity Search

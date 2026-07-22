@@ -1,7 +1,7 @@
-package com.spig.spig.learning.repository;
+package com.spig.spig.domain.learning.repository;
 
-import com.spig.spig.learning.entity.EmbeddingStatus;
-import com.spig.spig.learning.entity.LearningContent;
+import com.spig.spig.domain.learning.entity.EmbeddingStatus;
+import com.spig.spig.domain.learning.entity.LearningContent;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

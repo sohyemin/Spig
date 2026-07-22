@@ -1,4 +1,4 @@
-package com.spig.spig.learning.entity;
+package com.spig.spig.domain.learning.entity;
 
 public enum EmbeddingStatus {
     PENDING,

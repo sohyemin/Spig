@@ -1,6 +1,6 @@
-package com.spig.spig.ai.service;
+package com.spig.spig.domain.ai.service;
 
-import com.spig.spig.ai.dto.AiChatRequest;
+import com.spig.spig.domain.ai.dto.AiChatRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;

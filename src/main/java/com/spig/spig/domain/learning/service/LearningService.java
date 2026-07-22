@@ -1,7 +1,7 @@
-package com.spig.spig.learning.service;
+package com.spig.spig.domain.learning.service;
 
-import com.spig.spig.learning.dto.LearningRequestDto;
-import com.spig.spig.learning.dto.LearningResponseDto;
+import com.spig.spig.domain.learning.dto.LearningRequestDto;
+import com.spig.spig.domain.learning.dto.LearningResponseDto;
 
 import java.util.List;
 
