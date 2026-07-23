@@ -2,7 +2,9 @@ package com.spig.spig.domain.room.signaling.config.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spig.spig.domain.room.service.RoomService;
 import com.spig.spig.domain.room.signaling.dto.SignalingMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -17,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -24,8 +27,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ConcurrentHashMap<String, WebSocketSession> sessions
             = new ConcurrentHashMap<>();
     // room 관리를 위한 리스트 추가
-    private final Map<String, Set<WebSocketSession>> roomSessions
-            = new ConcurrentHashMap<>();
+    private final RoomService roomService;
+    // session 관련
+    private final SessionRegistry sessionRegistry;
 
 
     /*
@@ -57,22 +61,14 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             log.info("Processing {} message for room : {}", signalingMessage.getType(), roomId);
 
             switch (signalingMessage.getType()) {
-                case JOIN :
+                case JOIN -> {
                     handleJoinMessage(session, signalingMessage);
-                    break;
-                case OFFER :
+                }
+                case OFFER,ANSWER,ICE_CANDIDATE -> {
                     log.info("Receive offer from : {}", session.getId());
                     sendToTarget(session, signalingMessage);
-                    break;
-                case ANSWER :
-                    log.info("Receive answer from : {}", session.getId());
-                    sendToTarget(session, signalingMessage);
-                    break;
-                case ICE_CANDIDATE:
-                    log.info("Receive ICE CANDIDATE from : {}", session.getId());
-                    sendToTarget(session, signalingMessage);
-                    break;
-                default:
+                }
+                default ->
                     log.warn("Unknown Message type : {}", signalingMessage.getType());
             }
         } catch (Exception e){
@@ -81,12 +77,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void sendToTarget(WebSocketSession session, SignalingMessage signalingMessage) throws IOException {
-        String targetId = signalingMessage.getTargetId();
 
-        WebSocketSession targetSession = sessions.get(targetId);
+        WebSocketSession targetSession = sessionRegistry.findTargetSession(session, signalingMessage);
 
         if (targetSession == null || !targetSession.isOpen()) {
-            log.warn("Target session not found or closed: {}", targetId);
+            log.warn("Target session not found or closed: {}", session.getId());
             return;
         }
 
@@ -100,26 +95,22 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     * 방이 있을 경우 join 시킨다.
     * */
     private void handleJoinMessage(WebSocketSession session, SignalingMessage signalingMessage) {
-
-        // signalingMessage의 roomId를 기록
         String roomId = signalingMessage.getRoomId();
 
-        //signalingMessage에 roomId 부재시, roomSet 생성
-        Set<WebSocketSession> participants = roomSessions.computeIfAbsent(
-                roomId,
-                key -> ConcurrentHashMap.newKeySet()
-        );
-
-        // 2명 이상일 경우 return.
-        // room에 이미 있음. 수정 필요?
-        if (participants.size()>=2) {
-            log.warn("room {} is already full", roomId);
+        if (roomId == null || roomId.isBlank()) {
+            log.warn("방 번호가 입력되지 않았습니다.");
             return;
         }
 
-        participants.add(session);
+        boolean joined = roomService.join(session, roomId);
 
-        session.getAttributes().put("roomId", roomId);
+        if(!joined){
+            log.warn(
+                    "Session {}에서 room {} 접속이 실패했습니다.",
+                    session.getId(),
+                    roomId
+            );
+        }
     }
 
     /*
@@ -128,7 +119,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
      * */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        sessions.remove(session.getId());
+        sessions.remove(session.getId(), session);
+        roomService.leaveRoom(session);
         System.out.println("[+] afterConnectionClosed - Session: " + session.getId() + ", CloseStatus: " + status);
     }
 }
