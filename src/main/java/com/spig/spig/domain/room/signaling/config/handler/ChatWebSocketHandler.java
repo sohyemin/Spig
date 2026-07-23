@@ -1,15 +1,16 @@
 package com.spig.spig.domain.room.signaling.config.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spig.spig.domain.room.signaling.dto.SignalingMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +34,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     * */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
+        // 연결된 세션을 추가
         sessions.put(session.getId(), session);
         log.info("New WebSocket connection established: {}", session.getId());
     }
@@ -48,13 +50,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             // 클라이언트에게 메시지 받기
             log.info("Receive message from client {} : {}", session.getId(), message.getPayload());
 
+            //objectMapper를 통해 읽어온 정보를 signalingMessage에 매핑
             SignalingMessage signalingMessage = objectMapper.readValue(message.getPayload(), SignalingMessage.class);
             String roomId = signalingMessage.getRoomId();
-
-            Set<WebSocketSession> participants = roomSessions.computeIfAbsent(
-                    roomId,
-                    key -> ConcurrentHashMap.newKeySet()
-            );
 
             log.info("Processing {} message for room : {}", signalingMessage.getType(), roomId);
 
@@ -82,8 +80,18 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void sendToTarget(WebSocketSession session, SignalingMessage signalingMessage) {
+    private void sendToTarget(WebSocketSession session, SignalingMessage signalingMessage) throws IOException {
+        String targetId = signalingMessage.getTargetId();
 
+        WebSocketSession targetSession = sessions.get(targetId);
+
+        if (targetSession == null || !targetSession.isOpen()) {
+            log.warn("Target session not found or closed: {}", targetId);
+            return;
+        }
+
+        String payload = objectMapper.writeValueAsString(signalingMessage);
+        targetSession.sendMessage(new TextMessage(payload));
     }
 
     /*
@@ -92,9 +100,26 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     * 방이 있을 경우 join 시킨다.
     * */
     private void handleJoinMessage(WebSocketSession session, SignalingMessage signalingMessage) {
-        if (signalingMessage.getRoomId().isEmpty()){
 
+        // signalingMessage의 roomId를 기록
+        String roomId = signalingMessage.getRoomId();
+
+        //signalingMessage에 roomId 부재시, roomSet 생성
+        Set<WebSocketSession> participants = roomSessions.computeIfAbsent(
+                roomId,
+                key -> ConcurrentHashMap.newKeySet()
+        );
+
+        // 2명 이상일 경우 return.
+        // room에 이미 있음. 수정 필요?
+        if (participants.size()>=2) {
+            log.warn("room {} is already full", roomId);
+            return;
         }
+
+        participants.add(session);
+
+        session.getAttributes().put("roomId", roomId);
     }
 
     /*
