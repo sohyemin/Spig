@@ -2,10 +2,10 @@ package com.spig.spig.domain.room.signaling.config;
 
 import com.spig.spig.domain.room.signaling.config.handler.ChatWebSocketHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.config.annotation.*;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 @Configuration
 @EnableWebSocket
@@ -19,7 +19,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
      *
      * */
     @Override
-
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         System.out.println("[+] 최초 WebSocket 연결을 위한 Handler");
         registry
@@ -27,5 +26,14 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 .addHandler(chatWebSocketHandler, "/ws/signaling")
                 //접속 시도하는 모든 도메인 또는 IP에서 WebSocket 연결을 허용.
                 .setAllowedOrigins("*");
+    }
+
+    @Bean
+    public ServletServerContainerFactoryBean createWebSocketContainer(){
+        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+
+        container.setMaxTextMessageBufferSize(64 * 1024);
+
+        return container;
     }
 }

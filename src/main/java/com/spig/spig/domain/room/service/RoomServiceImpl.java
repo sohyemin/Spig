@@ -1,6 +1,7 @@
 package com.spig.spig.domain.room.service;
 
 import com.spig.spig.domain.room.model.Room;
+import com.spig.spig.domain.room.signaling.dto.JoinResult;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -16,7 +17,9 @@ public class RoomServiceImpl implements RoomService{
     private final Map<String, Room> rooms = new ConcurrentHashMap<>();
 
     @Override
-    public boolean join(WebSocketSession session, String roomId) {
+    public JoinResult join(WebSocketSession session, String roomId) {
+
+        session.getAttributes().put("roomId", roomId);
 
         Room room = rooms.computeIfAbsent(
                 roomId,

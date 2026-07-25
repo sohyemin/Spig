@@ -3,6 +3,7 @@ package com.spig.spig.domain.room.signaling.config.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spig.spig.domain.room.service.RoomService;
+import com.spig.spig.domain.room.signaling.dto.JoinResult;
 import com.spig.spig.domain.room.signaling.dto.SignalingMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,7 +67,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                     handleJoinMessage(session, signalingMessage);
                 }
                 case OFFER,ANSWER,ICE_CANDIDATE -> {
-                    log.info("Receive offer from : {}", session.getId());
+                    log.info("Receive {} from : {}", signalingMessage.getType(),session.getId());
                     sendToTarget(session, signalingMessage);
                 }
                 default ->
@@ -102,15 +104,32 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        boolean joined = roomService.join(session, roomId);
+        JoinResult joined = roomService.join(session, roomId);
 
-        if(!joined){
+        if(!joined.isSuccess()){
             log.warn(
                     "Session {}에서 room {} 접속이 실패했습니다.",
                     session.getId(),
                     roomId
             );
         }
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("type", "JOIN_SUCCESS");
+        response.put("roomId", roomId);
+        response.put("role", joined.getRole());
+
+        try {
+            session.sendMessage(
+                    new TextMessage(
+                            objectMapper.writeValueAsString(response)
+                    )
+            );
+        } catch (Exception e){
+            log.error("Error handling Message: ",e);
+        }
+
     }
 
     /*
