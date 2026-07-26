@@ -16,7 +16,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -25,13 +24,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    // WebSocket Session들이 관리하는 리스트
-    private final ConcurrentHashMap<String, WebSocketSession> sessions
-            = new ConcurrentHashMap<>();
     // room 관리를 위한 리스트 추가
     private final RoomService roomService;
     // session 관련
     private final SessionRegistry sessionRegistry;
+    // sendMessage 관리
+    private final WebSocketMessageSender messageSender;
 
 
     /*
@@ -40,8 +38,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     * */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        // 연결된 세션을 추가
-        sessions.put(session.getId(), session);
+        // sendMessage 동시성 관리를 위해 추가
+        messageSender.register(session);
         log.info("New WebSocket connection established: {}", session.getId());
     }
 
@@ -88,7 +86,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
 
         String payload = objectMapper.writeValueAsString(signalingMessage);
-        targetSession.sendMessage(new TextMessage(payload));
+        messageSender.send(session.getId(), new TextMessage(payload));
     }
 
     /*
@@ -96,7 +94,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     * 방이 없으면 생성하고,
     * 방이 있을 경우 join 시킨다.
     * */
-    private void handleJoinMessage(WebSocketSession session, SignalingMessage signalingMessage) {
+    private void handleJoinMessage(WebSocketSession session, SignalingMessage signalingMessage) throws IOException {
         String roomId = signalingMessage.getRoomId();
 
         if (roomId == null || roomId.isBlank()) {
@@ -120,14 +118,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         response.put("roomId", roomId);
         response.put("role", joined.getRole());
 
-        try {
-            session.sendMessage(
-                    new TextMessage(
-                            objectMapper.writeValueAsString(response)
-                    )
+        messageSender.send(session.getId(), new TextMessage(objectMapper.writeValueAsString(response)));
+
+        if (joined.shouldsendReady()){
+            messageSender.send(
+                    joined.getReadyTargetSessionId(),
+                    new TextMessage("""
+                            {
+                             "type":"READY"
+                            }                            
+                            """)
             );
-        } catch (Exception e){
-            log.error("Error handling Message: ",e);
         }
 
     }
@@ -138,7 +139,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
      * */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        sessions.remove(session.getId(), session);
+        messageSender.unregister(session.getId());
         roomService.leaveRoom(session);
         System.out.println("[+] afterConnectionClosed - Session: " + session.getId() + ", CloseStatus: " + status);
     }

@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Room {
 
     private final String roomId;
-    private WebSocketSession caller;
+    private String caller;
     private final Set<WebSocketSession> participants;
 
     public Room(String roomId) {
@@ -26,12 +26,12 @@ public class Room {
     public synchronized JoinResult join(WebSocketSession session) {
         if (participants.contains(session)){
             log.info("room {}에 이미 session {}이 존재합니다.", roomId, session.getId());
-            return new JoinResult(true);
+            return JoinResult.failed();
         }
 
         if(participants.size() >= 2){
             log.warn("room{}의 정원이 가득 찼습니다.", roomId);
-            return new JoinResult(false);
+            return JoinResult.failed();
         }
         participants.add(session);
 
@@ -43,25 +43,11 @@ public class Room {
         );
 
         if(participants.size() == 1) {
-            this.caller = session;
-            return new JoinResult(true, "CALLER");
-        }
-        if(participants.size() == 2) {
-            try{
-                caller.sendMessage(
-                        new TextMessage("""
-                            {
-                                    "type" : "READY"
-                            }"""
-                        )
-                );
-                log.info("session {}에 READY 발송", caller.getId());
-            } catch (IOException e){
-                log.error("Error caller Send Message: ",e);
-            }
+            this.caller = session.getId();
+            return JoinResult.caller();
         }
 
-        return new JoinResult(true, "CALLEE");
+        return JoinResult.callee(caller);
     }
 
     public synchronized void leave(WebSocketSession session) {
