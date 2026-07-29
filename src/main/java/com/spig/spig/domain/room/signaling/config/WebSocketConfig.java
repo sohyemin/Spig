@@ -22,7 +22,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         System.out.println("[+] 최초 WebSocket 연결을 위한 Handler");
         registry
-                //클라이언트에서 웹 소켓 연결을 위해 "ws-stomp"라는 엔드포인트로 연결을 시도하면 ChatWebSocketHandler에서 이를 처리
+                //클라이언트에서 웹 소켓 연결을 위해 "ws"라는 엔드포인트로 연결을 시도하면 ChatWebSocketHandler에서 이를 처리
                 .addHandler(chatWebSocketHandler, "/ws/signaling")
                 //접속 시도하는 모든 도메인 또는 IP에서 WebSocket 연결을 허용.
                 .setAllowedOrigins("*");
