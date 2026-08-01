@@ -1,8 +1,12 @@
 package com.spig.spig.domain.user.service;
 
-import java.util.UUID;
+import com.spig.spig.domain.user.dto.JoinRequestDto;
+import com.spig.spig.domain.user.dto.LoginRequestDto;
+import com.spig.spig.domain.user.dto.LoginResponseDto;
 
-public class UserService {
+public interface UserService {
 
-    private UUID id;
+    public void join(JoinRequestDto dto);
+
+    public LoginResponseDto login(LoginRequestDto dto);
 }

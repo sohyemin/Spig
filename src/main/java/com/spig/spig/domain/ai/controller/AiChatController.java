@@ -24,7 +24,7 @@ public class AiChatController {
     }
 
     @GetMapping("/api/ai/ask")
-    public AiChatResponse ask(@RequestParam String question) {
-        return new AiChatResponse(ragService.search(question));
+    public AiChatResponse ask(@RequestBody AiChatRequest request) {
+        return new AiChatResponse(ragService.search(request.getMessage()));
     }
 }
