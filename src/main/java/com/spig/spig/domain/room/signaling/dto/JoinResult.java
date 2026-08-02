@@ -1,7 +1,9 @@
 package com.spig.spig.domain.room.signaling.dto;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 public class JoinResult {
     private boolean success;
@@ -17,6 +19,7 @@ public class JoinResult {
     }
 
     public static JoinResult callee(String readyTargetSessionId){
+        log.info("caller : {}", readyTargetSessionId);
         return new JoinResult(true, "CALLEE", readyTargetSessionId);
     }
 
@@ -27,6 +30,6 @@ public class JoinResult {
     public JoinResult(boolean success, String role, String readyTargetSessionId) {
         this.success = success;
         this.role = role;
-        this.readyTargetSessionId = getReadyTargetSessionId();
+        this.readyTargetSessionId = readyTargetSessionId;
     }
 }

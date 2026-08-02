@@ -49,7 +49,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
      *               Message.getPayload()를 통해 메시지가 전달
      * */
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         try {
             // 클라이언트에게 메시지 받기
             log.info("Receive message from client {} : {}", session.getId(), message.getPayload());
@@ -86,7 +86,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
 
         String payload = objectMapper.writeValueAsString(signalingMessage);
-        messageSender.send(session.getId(), new TextMessage(payload));
+        messageSender.send(targetSession.getId(), new TextMessage(payload));
     }
 
     /*

@@ -44,9 +44,12 @@ public class Room {
 
         if(participants.size() == 1) {
             this.caller = session.getId();
+            log.info("caller : {}", session.getId());
             return JoinResult.caller();
         }
 
+
+        log.info("caller : {}", caller);
         return JoinResult.callee(caller);
     }
 

@@ -4,6 +4,7 @@ import com.spig.spig.domain.ai.dto.AiChatRequest;
 import com.spig.spig.domain.ai.dto.AiChatResponse;
 import com.spig.spig.domain.ai.service.AiChatService;
 import com.spig.spig.domain.ai.service.RagService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +25,7 @@ public class AiChatController {
     }
 
     @GetMapping("/api/ai/ask")
-    public AiChatResponse ask(@RequestBody AiChatRequest request) {
+    public AiChatResponse ask(@Valid @RequestBody AiChatRequest request) {
         return new AiChatResponse(ragService.search(request.getMessage()));
     }
 }
