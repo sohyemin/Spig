@@ -17,7 +17,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/ai/**",
-                                "/api/learning/**"
+                                "/api/learning/**",
+                                "/ws/signaling"
 
                         )
                         .permitAll()
