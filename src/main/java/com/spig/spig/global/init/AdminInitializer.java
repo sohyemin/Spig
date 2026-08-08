@@ -19,7 +19,7 @@ public class AdminInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
 
-        if (userRepository.findByLoginId("admin").isPresent()) {
+        if (userRepository.findByLoginId("admin@1234").isPresent()) {
             return;
         }
 
