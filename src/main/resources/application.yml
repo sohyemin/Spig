@@ -23,3 +23,8 @@ spring:
     vectorstore:
       pgvector:
         initialize-schema: true
+
+  jwt:
+    issuer: spig-api
+    secret: ${JWT_SECRET}
+    access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
