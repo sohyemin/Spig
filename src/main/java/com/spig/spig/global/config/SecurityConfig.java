@@ -18,8 +18,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/ai/**",
                                 "/api/learning/**",
-                                "/ws/signaling"
-
+                                "/ws/signaling",
+                                "/api/auth/signup",
+                                "/api/auth/login"
                         )
                         .permitAll()
                         .anyRequest()
