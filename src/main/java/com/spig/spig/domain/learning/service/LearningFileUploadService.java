@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public interface LearningFileUploadRepository {
+public interface LearningFileUploadService {
 
     // Create
     UploadResponseDto upload(MultipartFile file);
