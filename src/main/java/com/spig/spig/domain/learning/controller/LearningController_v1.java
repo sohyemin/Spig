@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/learning")
 @RequiredArgsConstructor
-public class LearningController {
+public class LearningController_v1 {
 
     private final LearningService learningService;
 

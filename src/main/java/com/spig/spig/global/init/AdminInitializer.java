@@ -24,7 +24,7 @@ public class AdminInitializer implements ApplicationRunner {
         }
 
         User admin = User.builder()
-                .loginId("admin")
+                .loginId("admin@1234")
                 .name("관리자")
                 .password(passwordEncoder.encode("admin1234"))
                 .role(UserRole.ADMIN)
