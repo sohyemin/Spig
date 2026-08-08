@@ -54,6 +54,21 @@ public class LearningFile {
                 .build();
     }
 
+    public void replace(
+            String originalName,
+            String storedName,
+            String storagePath,
+            String contentType,
+            long size
+    ) {
+        this.originalName = originalName;
+        this.storedName = storedName;
+        this.storagePath = storagePath;
+        this.contentType = contentType;
+        this.size = size;
+        this.status = FileUploadStatus.UPLOADING;
+    }
+
     public void markSuccess() {
         this.status = FileUploadStatus.SUCCESS;
     }
