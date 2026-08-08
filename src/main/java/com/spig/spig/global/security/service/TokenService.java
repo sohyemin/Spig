@@ -3,6 +3,7 @@ package com.spig.spig.global.security.service;
 import com.spig.spig.domain.user.dto.LoginResponseDto;
 import com.spig.spig.domain.user.entity.User;
 import com.spig.spig.global.security.props.JWTProps;
+import com.spig.spig.global.security.token.JWTClaimConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -33,7 +34,9 @@ public class TokenService {
                 .issuedAt(issuedAt)
                 .expiresAt(expiresAt)
                 .subject(user.getId().toString())
-                .claim("roles", List.of(user.getRole().name()))
+                .claim(JWTClaimConstants.ROLES, List.of(user.getRole().name()))
+                .claim(JWTClaimConstants.TOKEN_TYPE,
+                        JWTClaimConstants.ACCESS_TOKEN)
                 .build();
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256)
@@ -45,6 +48,6 @@ public class TokenService {
                 JwtEncoderParameters.from(header, claims)
         ).getTokenValue();
 
-        return LoginResponseDto.to(accessToken);
+        return LoginResponseDto.to(accessToken, user.getRole());
     }
 }

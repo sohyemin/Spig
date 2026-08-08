@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties("spig.jwt")
+@ConfigurationProperties(prefix = "spring.jwt")
 public class JWTProps {
     private String issuer;
     private String secret;
