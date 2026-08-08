@@ -8,11 +8,13 @@ import lombok.Getter;
 @Builder
 public class LoginResponseDto {
 
-    private String name;
+    private String accessToken;
+    private String tokenType;
 
-    public static LoginResponseDto to(User user) {
+    public static LoginResponseDto to(String accessToken) {
         return LoginResponseDto.builder()
-                .name(user.getName())
+                .accessToken(accessToken)
+                .tokenType("Bearer")
                 .build();
     }
 }

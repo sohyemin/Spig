@@ -6,6 +6,7 @@ import com.spig.spig.domain.user.dto.LoginResponseDto;
 import com.spig.spig.domain.user.entity.User;
 import com.spig.spig.domain.user.repository.UserRepository;
 import com.spig.spig.global.exception.CustomException;
+import com.spig.spig.global.security.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,7 @@ import static com.spig.spig.global.exception.ErrorCode.USER_NOT_FOUND;
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
+    private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -43,6 +45,6 @@ public class UserServiceImpl implements UserService{
             throw new CustomException(USER_NOT_FOUND, "비밀번호가 틀렸습니다.");
         }
 
-        return LoginResponseDto.to(user);
+        return tokenService.issueTokens(user);
     }
 }

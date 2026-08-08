@@ -2,6 +2,7 @@ package com.spig.spig.domain.room.service;
 
 import com.spig.spig.domain.room.model.Room;
 import com.spig.spig.domain.room.signaling.dto.JoinResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Service
 public class RoomServiceImpl implements RoomService{
 
@@ -36,11 +38,27 @@ public class RoomServiceImpl implements RoomService{
 
     @Override
     public void leaveRoom(WebSocketSession session) {
-        String roomId = session.getAttributes().get("roomId").toString();
+        Object roomIdAttribute =
+                session.getAttributes().get("roomId");
+
+        if (roomIdAttribute == null) {
+            log.debug(
+                    "session {}은 참여한 방이 없어 leaveRoom을 생략합니다.",
+                    session.getId()
+            );
+            return;
+        }
+
+        String roomId = roomIdAttribute.toString();
 
         Room room = rooms.get(roomId);
 
         if (room == null) {
+            log.warn(
+                    "room {}을 찾을 수 없습니다. sessionId={}",
+                    roomId,
+                    session.getId()
+            );
             return;
         }
 
