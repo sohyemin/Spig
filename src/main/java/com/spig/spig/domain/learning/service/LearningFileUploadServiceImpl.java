@@ -3,7 +3,7 @@ package com.spig.spig.domain.learning.service;
 import com.spig.spig.domain.learning.dto.UploadResponseDto;
 import com.spig.spig.domain.learning.entity.LearningFile;
 import com.spig.spig.domain.learning.repository.LearningFileRepository;
-import com.spig.spig.global.storage.FileStorage;
+import com.spig.spig.global.storage.LocalFileStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,14 +19,14 @@ public class LearningFileUploadServiceImpl
         implements LearningFileUploadService {
 
     private final LearningFileRepository learningFileRepository;
-    private final FileStorage fileStorage;
+    private final LocalFileStorage localFileStorage;
 
     @Override
     @Transactional
     public UploadResponseDto upload(MultipartFile file) {
         validateFile(file);
 
-        Path storedPath = fileStorage.save(file);
+        Path storedPath = localFileStorage.save(file);
 
         try {
             LearningFile learningFile =
@@ -40,7 +40,7 @@ public class LearningFileUploadServiceImpl
             return UploadResponseDto.to(savedFile);
 
         } catch (RuntimeException exception) {
-            fileStorage.delete(storedPath.toString());
+            localFileStorage.delete(storedPath.toString());
             throw exception;
         }
     }
@@ -72,7 +72,7 @@ public class LearningFileUploadServiceImpl
         String previousStoragePath =
                 learningFile.getStoragePath();
 
-        Path newStoredPath = fileStorage.save(file);
+        Path newStoredPath = localFileStorage.save(file);
 
         try {
             learningFile.replace(
@@ -85,12 +85,12 @@ public class LearningFileUploadServiceImpl
 
             learningFile.markSuccess();
 
-            fileStorage.delete(previousStoragePath);
+            localFileStorage.delete(previousStoragePath);
 
             return UploadResponseDto.to(learningFile);
 
         } catch (RuntimeException exception) {
-            fileStorage.delete(newStoredPath.toString());
+            localFileStorage.delete(newStoredPath.toString());
             throw exception;
         }
     }
@@ -101,7 +101,7 @@ public class LearningFileUploadServiceImpl
         LearningFile learningFile =
                 getLearningFile(fileId);
 
-        fileStorage.delete(
+        localFileStorage.delete(
                 learningFile.getStoragePath()
         );
 

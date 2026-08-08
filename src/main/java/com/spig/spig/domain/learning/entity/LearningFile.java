@@ -51,6 +51,7 @@ public class LearningFile {
                 .storagePath(storagePath)
                 .contentType(contentType)
                 .size(size)
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 

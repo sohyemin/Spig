@@ -1,6 +1,7 @@
 package com.spig.spig.domain.learning.service;
 
 import com.spig.spig.domain.learning.dto.UploadResponseDto;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

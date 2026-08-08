@@ -1,5 +1,7 @@
 package com.spig.spig.global.config;
 
+import com.spig.spig.global.storage.FileStorage;
+import com.spig.spig.global.storage.LocalFileStorage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
