@@ -54,7 +54,6 @@ public class ChunkUpload {
 
 
         return ChunkUpload.builder()
-                .uploadId(UUID.randomUUID())
                 .originalName(request.getOriginalName())
                 .contentType(request.getContentType())
                 .totalSize(request.getTotalSize())
@@ -63,5 +62,13 @@ public class ChunkUpload {
                 .status(FileUploadStatus.CREATED)
                 .createdAt(LocalDateTime.now())
                 .build();
+    }
+
+    public void upload() {
+        status = FileUploadStatus.UPLOADING;
+    }
+
+    public void success() {
+        status = FileUploadStatus.SUCCESS;
     }
 }

@@ -2,6 +2,7 @@ package com.spig.spig.domain.learning.controller;
 
 import com.spig.spig.domain.learning.dto.ChunkUploadInitRequestDto;
 import com.spig.spig.domain.learning.dto.ChunkUploadInitResponseDto;
+import com.spig.spig.domain.learning.dto.ChunkUploadRequestDto;
 import com.spig.spig.domain.learning.dto.UploadResponseDto;
 import com.spig.spig.domain.learning.service.ChunkUploadService;
 import com.spig.spig.domain.learning.service.LearningFileUploadService;
@@ -13,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -47,17 +50,34 @@ public class AdminLearningFileController {
                 .body(response);
     }
 
-    @PutMapping("/uploads/{uploadId}/{chunkIndex}")
-    public UploadResponseDto uploadChunk(
-            @RequestParam("file") MultipartFile file
+    @PutMapping(
+            value = "/uploads/{uploadId}/{chunkNumber}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> uploadChunk(
+            @PathVariable UUID uploadId,
+            @PathVariable int chunkNumber,
+            @RequestPart("chunk") MultipartFile chunk
     ) {
-        return null;
+        log.info("청크 업로드 시작... :" + uploadId + ", " + chunkNumber);
+
+        ChunkUploadRequestDto request = new ChunkUploadRequestDto(uploadId, chunkNumber, chunk);
+
+        chunkUploadService.uploadChunk(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
     }
 
-    @PutMapping("/uploads/{uploadId}/{chunkIndex}/complete")
-    public UploadResponseDto uploadComplete(
-            @RequestParam("file") MultipartFile file
+    @PutMapping("/uploads/{uploadId}/complete")
+    public ResponseEntity<Void> uploadComplete(
+            @PathVariable UUID uploadId
     ) {
-        return null;
+
+        chunkUploadService.complete(uploadId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
     }
 }

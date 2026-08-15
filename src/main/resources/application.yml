@@ -37,4 +37,5 @@ spring:
 file:
   upload:
     directory: ${FILE_UPLOAD_DIR}
+    temp-directory: ${FILE_UPLOAD_TEMP_DIR}
     chunk-size: 5242880

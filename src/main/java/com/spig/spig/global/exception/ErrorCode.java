@@ -9,8 +9,11 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "Room not founded"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not founded"),
+    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "File not founded"),
     ROOM_NOT_AUTHORIZED(HttpStatus.NOT_FOUND, "Room not authorized"),
-    XSS_INPUT_ERROR(HttpStatus.BAD_REQUEST, "XSS input error");
+    XSS_INPUT_ERROR(HttpStatus.BAD_REQUEST, "XSS input error"),
+    CHUNK_STORAGE_ERROR(HttpStatus.BAD_REQUEST, "Chunk Upload failed"),
+    CHUNK_MERGE_FAIL(HttpStatus.BAD_REQUEST, "Chunk merge failed");
 
     private final HttpStatus status;
     private final String message;
