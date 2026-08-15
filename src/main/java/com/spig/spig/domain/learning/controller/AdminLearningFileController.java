@@ -34,13 +34,17 @@ public class AdminLearningFileController {
 
     // 청크 업로드
     @PostMapping("/uploads")
-    public ChunkUploadInitResponseDto chunkInit(
+    public ResponseEntity<ChunkUploadInitResponseDto> chunkInit(
             @Valid @RequestBody
             ChunkUploadInitRequestDto request
     ) {
         log.info("청크 파일 업로드 시작");
 
-        return chunkUploadService.createSession(request);
+        ChunkUploadInitResponseDto response = chunkUploadService.createSession(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @PutMapping("/uploads/{uploadId}/{chunkIndex}")
