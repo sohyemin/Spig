@@ -36,4 +36,5 @@ spring:
 
 file:
   upload:
-    directory: ${FILE_UPLOAD_DIR:./uploads/learning}
+    directory: ${FILE_UPLOAD_DIR}
+    chunk-size: 5242880
