@@ -1,16 +1,8 @@
 package com.spig.spig.domain.learning.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.spig.spig.domain.learning.dto.ChunkUploadInitRequestDto;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,6 +16,7 @@ import java.util.UUID;
 public class ChunkUpload {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID uploadId;
 
     @Column(nullable = false)
@@ -48,17 +41,23 @@ public class ChunkUpload {
     private LocalDateTime createdAt;
 
     public static ChunkUpload create(
-            String originalName,
-            String contentType,
-            long totalSize,
-            long chunkSize,
-            int totalChunks
+            ChunkUploadInitRequestDto request,
+            int chunkSize
     ) {
+
+        int totalChunks = Math.toIntExact(
+                Math.ceilDiv(
+                        request.getTotalSize(),
+                        chunkSize
+                )
+        );
+
+
         return ChunkUpload.builder()
                 .uploadId(UUID.randomUUID())
-                .originalName(originalName)
-                .contentType(contentType)
-                .totalSize(totalSize)
+                .originalName(request.getOriginalName())
+                .contentType(request.getContentType())
+                .totalSize(request.getTotalSize())
                 .chunkSize(chunkSize)
                 .totalChunks(totalChunks)
                 .status(FileUploadStatus.CREATED)

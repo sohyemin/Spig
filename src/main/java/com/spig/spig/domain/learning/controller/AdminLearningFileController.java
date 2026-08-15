@@ -1,10 +1,16 @@
 package com.spig.spig.domain.learning.controller;
 
+import com.spig.spig.domain.learning.dto.ChunkUploadInitRequestDto;
+import com.spig.spig.domain.learning.dto.ChunkUploadInitResponseDto;
 import com.spig.spig.domain.learning.dto.UploadResponseDto;
+import com.spig.spig.domain.learning.service.ChunkUploadService;
 import com.spig.spig.domain.learning.service.LearningFileUploadService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminLearningFileController {
 
     private final LearningFileUploadService uploadService;
+    private final ChunkUploadService chunkUploadService;
 
     // 일반 업로드
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -26,22 +33,24 @@ public class AdminLearningFileController {
     }
 
     // 청크 업로드
-    @PostMapping(value = "/uploads", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public UploadResponseDto chunkInit(
-            @RequestParam("file") MultipartFile file
+    @PostMapping("/uploads")
+    public ChunkUploadInitResponseDto chunkInit(
+            @Valid @RequestBody
+            ChunkUploadInitRequestDto request
     ) {
         log.info("청크 파일 업로드 시작");
-        return uploadService.upload(file);
+
+        return chunkUploadService.createSession(request);
     }
 
-    @PutMapping(value = "/uploads/${uploadId}/${chunkIndex}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/uploads/{uploadId}/{chunkIndex}")
     public UploadResponseDto uploadChunk(
             @RequestParam("file") MultipartFile file
     ) {
         return null;
     }
 
-    @PutMapping(value = "/uploads/${uploadId}/${chunkIndex}/complete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/uploads/{uploadId}/{chunkIndex}/complete")
     public UploadResponseDto uploadComplete(
             @RequestParam("file") MultipartFile file
     ) {
