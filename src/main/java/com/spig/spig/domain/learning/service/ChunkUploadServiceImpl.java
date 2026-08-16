@@ -13,10 +13,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.spig.spig.global.exception.ErrorCode.FILE_NOT_FOUND;
@@ -31,6 +35,16 @@ public class ChunkUploadServiceImpl implements ChunkUploadService{
 
     @Value("${file.upload.chunk-size}")private int chunkSize;
 
+    private final Set<String> ALLOWED_EXTENSIONS =
+            Set.of(
+                    "pdf",
+                    "png",
+                    "jpg",
+                    "jpeg",
+                    "gif",
+                    "webp"
+            );
+
     @Override
     public ChunkUploadInitResponseDto createSession(ChunkUploadInitRequestDto request) {
 
@@ -42,6 +56,7 @@ public class ChunkUploadServiceImpl implements ChunkUploadService{
         return ChunkUploadInitResponseDto.from(session);
     }
 
+    @Transactional
     @Override
     public void uploadChunk(ChunkUploadRequestDto request) {
         ChunkUpload upload = uploadRepository
@@ -54,10 +69,9 @@ public class ChunkUploadServiceImpl implements ChunkUploadService{
         chunkFileStorage.saveChunk(request);
 
         upload.upload();
-
-        uploadRepository.save(upload);
     }
 
+    @Transactional
     @Override
     public void complete(UUID uploadId) {
         ChunkUpload upload = uploadRepository
@@ -74,10 +88,35 @@ public class ChunkUploadServiceImpl implements ChunkUploadService{
             );
         }
 
-        Path finalPath = chunkFileStorage.mergeChunks(upload);
-
+        chunkFileStorage.mergeChunks(upload);
         upload.success();
-        uploadRepository.save(upload);
+
+        //파일 삭제
+        deleteChunksAfterCommit(uploadId);
+    }
+
+    private void deleteChunksAfterCommit(UUID uploadId) {
+        TransactionSynchronizationManager
+                .registerSynchronization(
+                        new TransactionSynchronization() {
+
+                            @Override
+                            public void afterCommit() {
+                                try {
+                                    chunkFileStorage
+                                            .deleteChunks(
+                                                    uploadId
+                                            );
+                                } catch (RuntimeException exception) {
+                                    log.warn(
+                                            "임시 청크 삭제 실패. uploadId={}",
+                                            uploadId,
+                                            exception
+                                    );
+                                }
+                            }
+                        }
+                );
     }
 
     private void validateChunkSize(ChunkUpload upload, int chunkNumber, MultipartFile chunk) {
@@ -115,15 +154,21 @@ public class ChunkUploadServiceImpl implements ChunkUploadService{
     }
 
     private void validateRequest(ChunkUploadInitRequestDto request) {
-        if (request == null) {
-            throw new IllegalArgumentException(
-                    "업로드 세션 요청이 비어 있습니다."
-            );
-        }
 
         if (!StringUtils.hasText(request.getOriginalName())) {
             throw new IllegalArgumentException(
                     "파일 이름은 필수입니다."
+            );
+        }
+
+        String extension =
+                StringUtils.getFilenameExtension(
+                        request.getOriginalName()
+                );
+
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            throw new IllegalArgumentException(
+                    "허용되지 않은 파일 확장자입니다."
             );
         }
 

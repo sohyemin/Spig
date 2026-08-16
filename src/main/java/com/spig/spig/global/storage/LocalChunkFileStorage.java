@@ -5,13 +5,17 @@ import com.spig.spig.domain.learning.entity.ChunkUpload;
 import com.spig.spig.global.exception.CustomException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
-import static com.spig.spig.global.exception.ErrorCode.CHUNK_MERGE_FAIL;
-import static com.spig.spig.global.exception.ErrorCode.CHUNK_STORAGE_ERROR;
+import static com.spig.spig.global.exception.ErrorCode.*;
 
 @Component
 public class LocalChunkFileStorage implements ChunkFileStorage {
@@ -34,6 +38,7 @@ public class LocalChunkFileStorage implements ChunkFileStorage {
                 finalFileDirectory
         ).toAbsolutePath().normalize();
     }
+
     @Override
     public void saveChunk(ChunkUploadRequestDto request) {
         try {
@@ -60,7 +65,7 @@ public class LocalChunkFileStorage implements ChunkFileStorage {
     }
 
     @Override
-    public Path mergeChunks(ChunkUpload upload) {
+    public void mergeChunks(ChunkUpload upload) {
         Path uploadDirectory = tempDirectory
                 .resolve(upload.getUploadId().toString())
                 .normalize();
@@ -71,8 +76,13 @@ public class LocalChunkFileStorage implements ChunkFileStorage {
             );
         }
 
+        String extension =
+                StringUtils.getFilenameExtension(
+                        upload.getOriginalName()
+                );
+
         String storedName =
-                upload.getUploadId() + ".file";
+                upload.getUploadId()+"."+extension;
 
         Path mergingPath = finalFileDirectory.resolve(
                 storedName + ".part"
@@ -87,7 +97,7 @@ public class LocalChunkFileStorage implements ChunkFileStorage {
 
             try (OutputStream outputStream =
                          Files.newOutputStream(
-                                 mergingPath,
+                                 finalPath,
                                  StandardOpenOption.CREATE,
                                  StandardOpenOption.TRUNCATE_EXISTING
                          )) {
@@ -114,7 +124,7 @@ public class LocalChunkFileStorage implements ChunkFileStorage {
                 }
             }
 
-            if (Files.size(mergingPath)
+            if (Files.size(finalPath)
                     != upload.getTotalSize()) {
                 throw new IllegalStateException(
                         "병합된 파일 크기가 원본 크기와 다릅니다."
@@ -123,15 +133,47 @@ public class LocalChunkFileStorage implements ChunkFileStorage {
 
             upload.success();
 
-            return Files.move(
-                    mergingPath,
-                    finalPath,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
+//            return Files.move(
+//                    mergingPath,
+//                    finalPath,
+//                    StandardCopyOption.REPLACE_EXISTING
+//            );
         } catch (IOException exception) {
             throw new CustomException(CHUNK_MERGE_FAIL);
         }
     }
+
+    @Override
+    public void deleteChunks(UUID uploadId) {
+        Path uploadDirectory = tempDirectory
+                .resolve(uploadId.toString())
+                .normalize();
+
+        if (!uploadDirectory.startsWith(tempDirectory)) {
+            throw new IllegalArgumentException(
+                    "잘못된 업로드 경로입니다."
+            );
+        }
+
+        if (!Files.exists(uploadDirectory)) {
+            return;
+        }
+
+        try (Stream<Path> paths =
+                     Files.walk(uploadDirectory)) {
+
+            List<Path> deleteTargets = paths
+                    .sorted(Comparator.reverseOrder())
+                    .toList();
+
+            for (Path target : deleteTargets) {
+                Files.deleteIfExists(target);
+            }
+        } catch (IOException exception) {
+            throw new CustomException(CHUNK_FOLDER_DELETE_ERROR);
+        }
+    }
+
 
     private void validateChunkFile(
             ChunkUpload upload,

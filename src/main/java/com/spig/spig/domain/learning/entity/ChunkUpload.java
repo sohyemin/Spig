@@ -65,10 +65,15 @@ public class ChunkUpload {
     }
 
     public void upload() {
-        status = FileUploadStatus.UPLOADING;
+        if (status == FileUploadStatus.CREATED) {
+            status = FileUploadStatus.UPLOADING;
+        }
     }
 
     public void success() {
-        status = FileUploadStatus.SUCCESS;
+        if (status == FileUploadStatus.UPLOADING) {
+            status = FileUploadStatus.SUCCESS;
+
+        }
     }
 }

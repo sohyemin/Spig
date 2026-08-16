@@ -8,11 +8,10 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 public interface ChunkFileStorage {
-    void saveChunk(
-            ChunkUploadRequestDto request
-    );
 
-    Path mergeChunks(
-            ChunkUpload upload
-    );
+    void saveChunk(ChunkUploadRequestDto request);
+
+    void mergeChunks(ChunkUpload upload);
+
+    void deleteChunks(UUID uploadId);
 }
