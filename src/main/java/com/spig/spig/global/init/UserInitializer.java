@@ -19,6 +19,10 @@ public class UserInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
 
+        if (userRepository.findByLoginId("user1@1234").isPresent()) {
+            return;
+        }
+
         User user1 = User.builder()
                 .loginId("user1@1234")
                 .name("유저1")
